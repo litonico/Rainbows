@@ -1,32 +1,61 @@
 require 'minitest/autorun'
+require 'minitest/focus'
 require './src/rainbows'
 
 class RainbowsTest < Minitest::Test
+
   def setup
-    @rainbow = Rainbow.new
+    @greyscale = Greyscale.new
+    @hue = Hue.new
+    @cubehelix = Cubehelix.new
+  end
+
+  def test_clamping
+    assert_equal 360, clamp(10000, 0, 360)
+    assert_equal 0, clamp(-20, 0, 360)
+  end
+
+  def test_scaling_clamps_values
+    assert_equal 360, scale(10000, 0, 360)
+    assert_equal 0, scale(-20, 0, 360)
+  end
+
+  def test_scaling
+    # Boring ranges
+    # (We use assert_same instead of _equal to make sure we're 
+    # really getting integers back)
+    assert_same 0, scale(0, 0, 360)
+    assert_same 180, scale(180, 0, 360)
+    assert_same 360, scale(360, 0, 360)
+    assert_same 30, scale(30, 0, 360)
+    # From smaller ranges
+    assert_same 0, scale(0, 180, 360)
+    assert_same 180, scale(50, 0, 100)
+    # From larger ranges
+    assert_same 180, scale(400, 100, 900)
   end
 
   def test_greyscale
-    assert_equal [0, 0, 0], @rainbow.greyscale(0)         # Black
-    assert_equal [127, 127, 127], @rainbow.greyscale(180) # Mid-grey
-    assert_equal [255, 255, 255], @rainbow.greyscale(360) # White
+    assert_equal [0, 0, 0], @greyscale.color(0)         # Black
+    assert_equal [127, 127, 127], @greyscale.color(180) # Mid-grey
+    assert_equal [255, 255, 255], @greyscale.color(360) # White
   end
 
-  # TODO(Lito): make spectra respect min and max, e.g.
-  # def test_greyscale_start_and_end
-  #   # Half a greyscale spectrum
-  #   assert_equal [127, 127, 127], @rainbow.greyscale(0, 180, 360)
-  # end
+  def test_rainbow_start_and_end
+    # Half a greyscale spectrum
+    assert_equal [127, 127, 127], @greyscale.color(50, 0, 100)
+    assert_equal [255, 255, 255], @greyscale.color(1000, 0, 100)
+  end
 
   def test_hue
-    assert_equal [255, 0, 0], @rainbow.hue(0)     # Red
-    assert_equal [255, 127, 0], @rainbow.hue(30)  # Orange
-    assert_equal [255, 255, 0], @rainbow.hue(60)  # Yellow
-    assert_equal [0, 255, 0], @rainbow.hue(120)   # Green
-    assert_equal [0, 255, 255], @rainbow.hue(180) # Cyan
-    assert_equal [0, 0, 255], @rainbow.hue(240)   # Blue
-    assert_equal [255, 0, 255], @rainbow.hue(300) # Magenta
-    assert_equal [255, 0, 0], @rainbow.hue(360)   # Red
+    assert_equal [255, 0, 0], @hue.color(0)     # Red
+    assert_equal [255, 127, 0], @hue.color(30)  # Orange
+    assert_equal [255, 255, 0], @hue.color(60)  # Yellow
+    assert_equal [0, 255, 0], @hue.color(120)   # Green
+    assert_equal [0, 255, 255], @hue.color(180) # Cyan
+    assert_equal [0, 0, 255], @hue.color(240)   # Blue
+    assert_equal [255, 0, 255], @hue.color(300) # Magenta
+    assert_equal [255, 0, 0], @hue.color(360)   # Red
   end
 
   def test_perceptual
@@ -46,14 +75,11 @@ class RainbowsTest < Minitest::Test
       end
     end
 
-    assert_equal rgb_255_reference[0], @rainbow.cubehelix(0)
-    assert_equal rgb_255_reference[1], @rainbow.cubehelix(90)
-    assert_equal rgb_255_reference[2], @rainbow.cubehelix(180)
-    assert_equal rgb_255_reference[3], @rainbow.cubehelix(270)
-    assert_equal rgb_255_reference[4], @rainbow.cubehelix(360)
+    assert_equal rgb_255_reference[0], @cubehelix.color(0)
+    assert_equal rgb_255_reference[1], @cubehelix.color(90)
+    assert_equal rgb_255_reference[2], @cubehelix.color(180)
+    assert_equal rgb_255_reference[3], @cubehelix.color(270)
+    assert_equal rgb_255_reference[4], @cubehelix.color(360)
 
-  end
-
-  def test_jet
   end
 end
