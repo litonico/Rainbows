@@ -98,33 +98,21 @@ class Cubehelix < Rainbow
   end
 
   def _color degree
-    #angle = 2*Math::PI*(start/3.0+1.0+rotation*fract)
-    [0, 0, 0]
+    d = degree/360.0
+    start = 0.5 # Starting position in color space - 0=blue, 1=red, 2=green
+    rotations = -1.5 # How many rotations through the rainbow?
+    saturation = 1.2
+    gamma = 1.0
+    fract = d**gamma # Position on the spectrum
+    
+    # Amplitude of the helix
+    amp = saturation * fract * (1 - fract) / 2.0
+    angle = 2*Math::PI*(start/3.0 + 1.0 + rotations*fract)
+    # From the CubeHelix Equations
+    r = fract + amp * (-0.14861 * Math.cos(angle) + 1.78277 * Math.sin(angle))
+    g = fract + amp * (-0.29227 * Math.cos(angle) - 0.90649 * Math.sin(angle))
+    b = fract + amp * (1.97294 * Math.cos(angle))
+
+    [(r * 255).round, (g * 255).round, (b * 255).round]
   end
 end
-
-# TODO(Lito)
-#   ##
-#   # Spectrum with constant brightness
-#   #
-#   def perceptual degree
-#   end
-#
-#   ##
-#   # NOTE(Lito): Do we really need this?
-#   #
-#   def jet degree
-#   end
-#
-#   ##
-#   #
-#   #
-#   def parula degree
-#   end
-#
-#   ##
-#   # Blue-green-yellow-red spectrum for for simulations
-#   #
-#   def nico degree
-#   end
-# end

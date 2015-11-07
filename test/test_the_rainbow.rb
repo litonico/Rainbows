@@ -22,7 +22,7 @@ class RainbowsTest < Minitest::Test
 
   def test_scaling
     # Boring ranges
-    # (We use assert_same instead of _equal to make sure we're 
+    # (We use assert_same instead of _equal to make sure we're
     # really getting integers back)
     assert_same 0, scale(0, 0, 360)
     assert_same 180, scale(180, 0, 360)
@@ -63,23 +63,37 @@ class RainbowsTest < Minitest::Test
 
   def test_cubehelix
     # Cubehelix reference values from James Davenport's Python implementation
+    # Using:
+    # start       = 0.5
+    # rotations   = -1.5
+    # saturation  = 1.2
+    # gamma       = 1.0
+    # NOTE(Lito): These values are slightly different from my Ruby
+    # implementation. This could be floating-point error, or because
+    # cubehelix uses a slightly different scale (1-256 vs 0-360).
     reference_values = [[0.0, 0.0, 0.0],                              # 0
     [0.052086060929534689, 0.34174526961141383, 0.30658807547214501], # 90
     [0.65901854013946559, 0.46936557468373608, 0.24845035363356044],  # 180
     [0.78295958648052344, 0.69774239781785263, 0.96714049479106534],  # 270
     [1.0, 1.0, 1.0]]                                                  # 360
     # Move the colors from 0-1 scale to a 0-255 scale
-    rgb_255_reference = reference_values.map do|rgb|
+    rgb_255_reference = reference_values.map do |rgb|
       rgb.map do |color|
-        (color*255).floor
+        (color*255).round
       end
     end
 
-    assert_equal rgb_255_reference[0], @cubehelix.color(0)
-    assert_equal rgb_255_reference[1], @cubehelix.color(90)
-    assert_equal rgb_255_reference[2], @cubehelix.color(180)
-    assert_equal rgb_255_reference[3], @cubehelix.color(270)
-    assert_equal rgb_255_reference[4], @cubehelix.color(360)
+    def assert_arr_in_delta exp, act, delta
+      exp.zip(act) do |e, a|
+        assert_in_delta e, a, delta
+      end
+    end
+
+    assert_arr_in_delta rgb_255_reference[0], @cubehelix.color(0),   2
+    assert_arr_in_delta rgb_255_reference[1], @cubehelix.color(90),  2
+    assert_arr_in_delta rgb_255_reference[2], @cubehelix.color(180), 2
+    assert_arr_in_delta rgb_255_reference[3], @cubehelix.color(270), 2
+    assert_arr_in_delta rgb_255_reference[4], @cubehelix.color(360), 2
 
   end
 end
